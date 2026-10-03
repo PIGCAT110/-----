@@ -1,0 +1,104 @@
+<Window x:Class="PowerManager.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="猪猫帮你关"
+        Icon="/Assets/power.ico"
+        Width="880"
+        Height="600"
+        MinWidth="720"
+        MinHeight="480"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部标题与运行状态 -->
+        <DockPanel Grid.Row="0">
+            <Border DockPanel.Dock="Right"
+                    Background="{StaticResource AccentSoftBrush}"
+                    CornerRadius="12"
+                    Padding="12,5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#x25CF;"
+                               FontSize="10"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource AccentBrush}" />
+                    <TextBlock x:Name="StatusPillText"
+                               Text="运行中"
+                               FontSize="12.5"
+                               Margin="7,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource AccentBrush}" />
+                </StackPanel>
+            </Border>
+            <TextBlock Text="猪猫帮你关"
+                       Style="{StaticResource HeaderTitleTextStyle}"
+                       VerticalAlignment="Center" />
+        </DockPanel>
+
+        <!-- 实时状态卡片 -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Margin="0,20,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="应用状态" Style="{StaticResource SecondaryTextStyle}" Margin="0,0,0,12" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="运行中（系统托盘常驻）" Margin="0,0,0,12" FontSize="13.5" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="已运行时长" Style="{StaticResource SecondaryTextStyle}" Margin="0,0,0,12" />
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="UptimeText" Text="00:00:00" Margin="0,0,0,12" FontSize="13.5" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="开机自启" Style="{StaticResource SecondaryTextStyle}" Margin="0,0,0,12" />
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="StartupText" Margin="0,0,0,12" FontSize="13.5" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="关闭窗口时" Style="{StaticResource SecondaryTextStyle}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CloseBehaviorText" FontSize="13.5" />
+            </Grid>
+        </Border>
+
+        <!-- 说明卡片 -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Margin="0,14,0,0">
+            <StackPanel>
+                <TextBlock Text="后台运行说明" Style="{StaticResource SectionTitleTextStyle}" />
+                <TextBlock x:Name="TrayHintText"
+                           Style="{StaticResource SecondaryTextStyle}"
+                           Margin="0,8,0,0"
+                           Text="关闭主窗口后，应用将继续在系统托盘运行。右键托盘图标可查看状态、打开设置或退出应用。" />
+            </StackPanel>
+        </Border>
+
+        <!-- 底部操作区 -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="ExitButton"
+                    Content="退出应用"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,10,0"
+                    Click="ExitButton_Click" />
+            <Button x:Name="SettingsButton"
+                    Content="设置…"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,10,0"
+                    Click="SettingsButton_Click" />
+            <Button x:Name="HideButton"
+                    Content="隐藏到托盘"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="HideButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

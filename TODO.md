@@ -27,14 +27,22 @@
 - 运行权限：asInvoker，不申请管理员；目标系统 Windows 10 及以上（PerMonitorV2 DPI 感知）。
 - 打包方式：win-x64 框架依赖单文件 exe；目标机器需安装 .NET 8 Desktop Runtime，最终安装包方案在任务 12 确定。
 
-### [ ] 2. 建立基础界面和系统托盘
-状态：待开始
+### [x] 2. 建立基础界面和系统托盘
+状态：已完成（2026-10-03）
 
 验收标准：
 
 - 主窗口可以打开、关闭和恢复。
 - 关闭主窗口后可按设计继续后台运行。
 - 托盘菜单至少支持打开设置、查看状态和退出应用。
+
+实现决策：
+
+- 配置持久化放 Core 层：`AppSettings`（纯 POCO）+ `SettingsStore`（JSON，camelCase；缺失/损坏回退默认值，保存自动建目录），配 4 个针对性单测。
+- 开机自启用 HKCU `...\CurrentVersion\Run`（值名 PowerManager，值为 exe 全路径），不需管理员；App 层 `WindowsStartup` 封装读写。
+- 托盘用 WinForms `NotifyIcon`（WPF 无原生托盘），`TrayIconManager` 把查看状态/设置/退出三个动作以委托注入，窗口生命周期逻辑仍集中在 App；WPF 与 WinForms 类型歧义用文件级 using 别名解决。
+- 单实例：Local 命名空间 Mutex；关闭主窗口默认最小化到托盘（可在设置关闭），首次驻留弹一次气泡提示；退出只能通过「退出应用」或托盘菜单。
+- 主窗口为状态页（应用状态、运行时长、自启与关闭行为入口），设置窗口为模态对话框；Win11 浅色风资源字典（圆角卡片、蓝色强调）。
 
 ## 阶段二：电源动作
 
