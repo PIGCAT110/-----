@@ -13,12 +13,12 @@
 
 ## 当前状态
 
-- 项目阶段：阶段一 · 项目基础
-- 当前步骤：2（TODO 任务 2：基础界面和系统托盘）
-- 已完成步骤：1（TODO 任务 1：初始化项目）
-- 最近 commit：ec7ee22
-- 当前架构：.NET 8 / WPF，Core（领域规则）、App（WPF）、Core.Tests（xUnit）三项目分层
-- 阻塞问题：无（winget 安装 SDK 受 UAC 限制，已改用官方 dotnet-install.ps1 per-user 安装）
+- 项目阶段：阶段二 · 电源动作
+- 当前步骤：3（TODO 任务 3：实现电源操作）
+- 已完成步骤：2（TODO 任务 1 初始化项目、任务 2 基础界面和系统托盘）
+- 最近 commit：93e7788
+- 当前架构：.NET 8 / WPF，Core（领域规则/配置）、App（WPF + WinForms 托盘）、Core.Tests（xUnit）三项目分层
+- 阻塞问题：无
 
 ## 进度记录
 
@@ -39,6 +39,30 @@
   - 最终安装包（独立部署或引导安装运行时）在任务 12 确定；当前发布为框架依赖，目标机器需 .NET 8 Desktop Runtime。
   - 打包发布时需注意 CI/其他机器使用官方 SDK 安装方式。
 - 下一步：建立基础界面、配置持久化与系统托盘常驻（TODO 任务 2）。
+
+### Step 1：基础界面和系统托盘
+
+- 状态：✅ 已完成
+- 完成时间：2026-10-03
+- 目标：主窗口可打开/关闭/恢复；关闭后后台常驻；托盘菜单支持查看状态、打开设置、退出应用。
+- 实现内容：
+  - Core：`Configuration/AppSettings`（MinimizeToTrayOnClose 等设置 POCO）、`SettingsStore`（JSON camelCase、缩进；文件缺失/目录缺失/JSON 损坏均回退默认值，Save 自动建目录）。
+  - App 生命周期：`App.xaml.cs` 持有 Mutex 单实例（Local\PowerManager.App.SingleInstance.v1）、OnExplicitShutdown、设置文件 `%APPDATA%\PowerManager\settings.json`、ShowMainWindow/OpenSettings/ExitApplication/首次驻留气泡。
+  - 托盘：`Infrastructure/TrayIconManager`（WinForms NotifyIcon；查看状态/设置…/分隔线/退出应用；双击=查看状态），动作以委托注入；`Assets/power.ico` 多尺寸图标。
+  - 开机自启：`Infrastructure/WindowsStartup` 读写 HKCU `Software\Microsoft\Windows\CurrentVersion\Run`（值名 PowerManager）。
+  - UI：`Views/MainWindow` 状态页（运行时长 DispatcherTimer、自启/关闭行为状态、设置/隐藏/退出三按钮，关闭时按设置最小化到托盘）；`Views/SettingsWindow` 模态设置（开机自启、关闭最小化到托盘，保存同时写注册表与 JSON）；App.xaml Win11 浅色风资源字典。
+- 验收结果：通过。
+  - `dotnet build`：0 警告 0 错误；`dotnet test`：5/5 通过（SettingsStore 缺失默认值、往返、建目录、损坏回退）。
+  - UIA 端到端 16/16 通过：主窗口三按钮、设置对话框 2 复选框、勾选状态切换、取消/保存、JSON false/true 持久化、注册表未被误写、隐藏后进程存活、第二实例自动退出、退出按钮结束进程。
+- Commit：`93e7788`
+- 当前架构变更：
+  - Core 新增 Configuration 目录；App 新增 Infrastructure（Win32/外壳相关）与 Views，原根目录 MainWindow 移入 Views。
+  - App 启用 UseWindowsForms（仅供 NotifyIcon）；DPI 从 manifest 改为 csproj `ApplicationHighDpiMode=PerMonitorV2`（WinForms 启用后 manifest dpi 节会触发 WFAC010）。
+- 风险或遗留问题：
+  - 托盘右键弹出菜单本身未能 UIA 自动化：Win11 任务栏 XAML 外壳不响应注入式鼠标右键（mouse_event/SetFocus+Shift+F10/PostMessage WM_USER 回调均被外壳或前台规则拦截）。菜单项与事件绑定为标准 WinForms 写法，三个委托动作均已通过主窗口等效入口端到端验证；建议在真实桌面人工右键托盘图标抽查一次（含设置窗口从托盘打开）。
+  - Win11 会在驻留气泡后把图标收入溢出区，属外壳默认行为；用户可将图标固定到任务栏。
+  - 根目录 PRD.md / DESIGN.md / AGENTS.md 仍未纳入 git（任务 1 起即未跟踪），未做处理。
+- 下一步：任务 3「实现电源操作」：定义 IPowerExecutor 与 Win32 实现（关机/重启/睡眠/休眠），统一执行前校验与明确错误；测试中用模拟实现隔离真实电源命令。
 
 ## 更新模板
 
